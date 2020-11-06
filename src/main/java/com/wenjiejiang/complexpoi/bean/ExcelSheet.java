@@ -12,6 +12,10 @@ public class ExcelSheet {
     private String name;
     private List<ExcelTable> excelTableList;
 
+    public ExcelSheet(String name) {
+        this.name = name;
+    }
+
     public String getName() {
         return name;
     }
