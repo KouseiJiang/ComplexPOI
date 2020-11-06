@@ -8,7 +8,7 @@ import java.util.List;
 /**
  * @author wenjiejiang
  * @date 2020/10/15 11:53
- * @description excel表格的列描述
+ * @description excel服务
  * @since 1.0
  */
 public interface IComplexExcelService {

@@ -7,17 +7,17 @@ package com.wenjiejiang.complexpoi.bean.constant;
  * @since 1.0
  */
 public enum EnumChartType {
-    LINE(1,"折线图"),
-    BAR(2,"柱状图"),
-    RADAR(3,"雷达图"),
-    PIE(4,"饼图");
+    LINE(1, "折线图"),
+    BAR(2, "柱状图"),
+    RADAR(3, "雷达图"),
+    PIE(4, "饼图");
 
     private Integer code;
     private String label;
 
-    public EnumChartType getLabelByCode(Integer code){
-        for (EnumChartType chartType: EnumChartType.values()) {
-            if (code.equals(chartType.getCode())){
+    public EnumChartType getLabelByCode(Integer code) {
+        for (EnumChartType chartType : EnumChartType.values()) {
+            if (code.equals(chartType.getCode())) {
                 return chartType;
             }
         }

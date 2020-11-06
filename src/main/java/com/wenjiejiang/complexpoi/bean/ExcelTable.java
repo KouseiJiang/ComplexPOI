@@ -77,8 +77,8 @@ public class ExcelTable<T> {
         this.location = location;
     }
 
-    public ExcelColumnMap getColMap(Field field){
-        for (ExcelColumnMap excelColumnMap:colNameMap) {
+    public ExcelColumnMap getColMap(Field field) {
+        for (ExcelColumnMap excelColumnMap : colNameMap) {
             excelColumnMap.getValue().equals(field);
             return excelColumnMap;
         }

@@ -39,15 +39,15 @@ public class TableChart {
      */
     private EnumChartType type;
 
-    final int defaultLength=6;
+    final int defaultLength = 6;
 
-    final int defaultWidth=11;
+    final int defaultWidth = 11;
 
     public TableChart() {
     }
 
     public TableChart(String title, EnumChartType type) {
-        this(title,null,null,type);
+        this(title, null, null, type);
     }
 
     public TableChart(String title, Integer length, Integer width, EnumChartType type) {
@@ -55,11 +55,11 @@ public class TableChart {
         this.length = length;
         this.width = width;
         this.type = type;
-        if (null==length){
-            this.length=defaultLength;
+        if (null == length) {
+            this.length = defaultLength;
         }
-        if (null==width){
-            this.width=defaultWidth;
+        if (null == width) {
+            this.width = defaultWidth;
         }
     }
 

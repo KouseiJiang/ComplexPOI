@@ -15,6 +15,7 @@ import org.apache.poi.xssf.usermodel.XSSFDrawing;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.openxmlformats.schemas.drawingml.x2006.chart.CTDLbls;
+
 import java.lang.reflect.Field;
 import java.util.*;
 
@@ -37,18 +38,18 @@ public class ComplexExcelServiceImpl implements IComplexExcelService {
     }
 
     private Sheet createSheet(ExcelSheet excelSheet, Workbook wb) {
-        Preconditions.checkArgument(!Strings.isNullOrEmpty(excelSheet.getName()),"sheet的name不能为null");
-        XSSFSheet sheet = (XSSFSheet)wb.createSheet(excelSheet.getName());
+        Preconditions.checkArgument(!Strings.isNullOrEmpty(excelSheet.getName()), "sheet的name不能为null");
+        XSSFSheet sheet = (XSSFSheet) wb.createSheet(excelSheet.getName());
         //设置默认的行高
-        sheet.setDefaultRowHeight((short)(27*20));
+        sheet.setDefaultRowHeight((short) (27 * 20));
         List<ExcelTable> excelTables = excelSheet.getExcelTableList();
-        Preconditions.checkArgument(null != excelTables && !excelTables.isEmpty(),"不允许建立一个空的sheet");
+        Preconditions.checkArgument(null != excelTables && !excelTables.isEmpty(), "不允许建立一个空的sheet");
         //创建2个点描述一个Table所占位置，为chart位置的计算和下一个table的位置的计算提供数据
-        ExcelElementCoord prevCoord=new ExcelElementCoord(0,0,0,0);
+        ExcelElementCoord prevCoord = new ExcelElementCoord(0, 0, 0, 0);
         //用来统计每一列的宽度，key为列索引，value为该列最长字符串的宽度
-        Map<Integer,Integer> colSizeMap=new HashMap<>();
+        Map<Integer, Integer> colSizeMap = new HashMap<>();
         for (int i = 0; i < excelTables.size(); i++) {
-            Map<Integer,Integer> colSizeMapItem=createSheetTable(sheet,excelTables.get(i),prevCoord,wb);
+            Map<Integer, Integer> colSizeMapItem = createSheetTable(sheet, excelTables.get(i), prevCoord, wb);
             colSizeMap.putAll(colSizeMapItem);
         }
         setColWidth(sheet, colSizeMap);
@@ -58,9 +59,9 @@ public class ComplexExcelServiceImpl implements IComplexExcelService {
     // 设置每一列的宽度
     private void setColWidth(XSSFSheet sheet, Map<Integer, Integer> colSizeMap) {
         for (int i = 0; i <= colSizeMap.keySet().stream().max(Comparator.comparing(indexKey -> indexKey)).get(); i++) {
-            Integer colSize=colSizeMap.get(i);
-            if (null!=colSize){
-                sheet.setColumnWidth(i,(colSize)*256);
+            Integer colSize = colSizeMap.get(i);
+            if (null != colSize) {
+                sheet.setColumnWidth(i, (colSize) * 256);
             }
         }
     }
@@ -68,41 +69,41 @@ public class ComplexExcelServiceImpl implements IComplexExcelService {
     /**
      * 创建一个excel中的一个sheet中的一张表格
      *
-     * @param sheet 工作簿
-     * @param table 表中的数据
+     * @param sheet     工作簿
+     * @param table     表中的数据
      * @param prevCoord 已知table的位置信息
      * @return key表格的列索引，value列宽度
      */
-    private Map<Integer,Integer> createSheetTable(XSSFSheet sheet, ExcelTable table, ExcelElementCoord prevCoord, Workbook wb) {
+    private Map<Integer, Integer> createSheetTable(XSSFSheet sheet, ExcelTable table, ExcelElementCoord prevCoord, Workbook wb) {
         String title = table.getTitle();
         List<ExcelColumnMap> colNameMap = table.getColNameMap();
-        Preconditions.checkArgument(!Strings.isNullOrEmpty(title),"表的标题不能为空");
+        Preconditions.checkArgument(!Strings.isNullOrEmpty(title), "表的标题不能为空");
         Preconditions.checkArgument(null != colNameMap && !colNameMap.isEmpty(), "表的列不能为空");
-        List<Object> tableData=table.getTableDataList();
+        List<Object> tableData = table.getTableDataList();
         //定义元素之间的间隔,除了第一张表格之外,间隔为2
-        final int NUM_OF_INTERVAL = prevCoord.getEndX().equals(0)? 0 : 2;
+        final int NUM_OF_INTERVAL = prevCoord.getEndX().equals(0) ? 0 : 2;
         //表格的标题和列名固定占两行
-        final int NUM_OF_TITLE=2;
+        final int NUM_OF_TITLE = 2;
         //获取表格里数据的行数
-        final int NUM_OF_DATA=null==tableData?0:tableData.size();
+        final int NUM_OF_DATA = null == tableData ? 0 : tableData.size();
         //改表的行起始索引
         int rowStartIndex = 0;
         //该表的列起始索引
         int colStartIndex = prevCoord.getEndX() + NUM_OF_INTERVAL;
         //表格的行最大索引
-        final int MAX_INDEX_OF_ROWS = rowStartIndex+NUM_OF_TITLE+NUM_OF_DATA;
+        final int MAX_INDEX_OF_ROWS = rowStartIndex + NUM_OF_TITLE + NUM_OF_DATA;
         //表格的列最大索引
-        final int MAX_INDEX_OF_COLUMNS = colStartIndex+colNameMap.size();
+        final int MAX_INDEX_OF_COLUMNS = colStartIndex + colNameMap.size();
         //更新最大坐标信息
-        prevCoord.updateCoord(colStartIndex,rowStartIndex,MAX_INDEX_OF_COLUMNS,MAX_INDEX_OF_ROWS);
+        prevCoord.updateCoord(colStartIndex, rowStartIndex, MAX_INDEX_OF_COLUMNS, MAX_INDEX_OF_ROWS);
         //记录一张表里列对应的数据,列名，行开始索引，行终止索引，列索引
-        Map<Field,String[]> colData=new HashMap<>(colNameMap.size());
-        Map<Integer,Integer> colSizeMap=fillTableData(sheet,table.getTitle(),colNameMap,tableData,rowStartIndex,colStartIndex,MAX_INDEX_OF_ROWS,MAX_INDEX_OF_COLUMNS,wb,colData);
-        List<TableChart> tableCharts=table.getTableChartList();
+        Map<Field, String[]> colData = new HashMap<>(colNameMap.size());
+        Map<Integer, Integer> colSizeMap = fillTableData(sheet, table.getTitle(), colNameMap, tableData, rowStartIndex, colStartIndex, MAX_INDEX_OF_ROWS, MAX_INDEX_OF_COLUMNS, wb, colData);
+        List<TableChart> tableCharts = table.getTableChartList();
         // 如果表格没有数据，不需要绘图
-        if (null!=tableCharts&&!tableCharts.isEmpty()&&null!=tableData&&!tableData.isEmpty()){
+        if (null != tableCharts && !tableCharts.isEmpty() && null != tableData && !tableData.isEmpty()) {
             for (int i = 0; i < tableCharts.size(); i++) {
-                createTableChart(sheet,tableCharts.get(i),prevCoord,tableData,colData);
+                createTableChart(sheet, tableCharts.get(i), prevCoord, tableData, colData);
             }
         }
         return colSizeMap;
@@ -110,11 +111,12 @@ public class ComplexExcelServiceImpl implements IComplexExcelService {
 
     /**
      * 创建一张图
-     * @param sheet 工作簿
+     *
+     * @param sheet      工作簿
      * @param tableChart 图的描述数据
-     * @param location 表格或前一张图的位置
-     * @param tableData 表格数据，只有在生成雷达图时用于计算坐标轴的单位长度
-     * @param colData 列数据
+     * @param location   表格或前一张图的位置
+     * @param tableData  表格数据，只有在生成雷达图时用于计算坐标轴的单位长度
+     * @param colData    列数据
      */
     private void createTableChart(XSSFSheet sheet, TableChart tableChart, ExcelElementCoord location, List<Object> tableData, Map<Field, String[]> colData) {
         //定义元素之间的间隔,除了第一张表格之外,间隔为2
@@ -133,31 +135,32 @@ public class ComplexExcelServiceImpl implements IComplexExcelService {
         XDDFChartLegend legend = chart.getOrAddLegend();
         legend.setPosition(LegendPosition.TOP_RIGHT);
         // 设置横纵坐标描述
-        XDDFCategoryAxis bottomAxis=new XDDFCategoryAxis(null);
-        XDDFValueAxis leftAxis=new XDDFValueAxis(null);
-        if (!EnumChartType.PIE.equals(tableChart.getType())){
-            bottomAxis= chart.createCategoryAxis(AxisPosition.BOTTOM);
-            leftAxis= chart.createValueAxis(AxisPosition.LEFT);
+        XDDFCategoryAxis bottomAxis = new XDDFCategoryAxis(null);
+        XDDFValueAxis leftAxis = new XDDFValueAxis(null);
+        if (!EnumChartType.PIE.equals(tableChart.getType())) {
+            bottomAxis = chart.createCategoryAxis(AxisPosition.BOTTOM);
+            leftAxis = chart.createValueAxis(AxisPosition.LEFT);
             leftAxis.setCrossBetween(AxisCrossBetween.BETWEEN);
         }
         // 设置数据源
-        String[] colXInfo=colData.get(tableChart.getChartXSeries());
+        String[] colXInfo = colData.get(tableChart.getChartXSeries());
         XDDFDataSource<String> xs = XDDFDataSourcesFactory.fromStringCellRange(sheet, new CellRangeAddress(Integer.valueOf(colXInfo[1]), Integer.valueOf(colXInfo[2]) - 1, Integer.valueOf(colXInfo[3]), Integer.valueOf(colXInfo[3])));
         setChartInfoByType(sheet, tableChart, tableData, colData, chart, bottomAxis, leftAxis, xs);
-        int endX=location.getEndX()>MAX_INDEX_OF_COLUMNS?location.getEndX():MAX_INDEX_OF_COLUMNS;
+        int endX = location.getEndX() > MAX_INDEX_OF_COLUMNS ? location.getEndX() : MAX_INDEX_OF_COLUMNS;
         location.updateCoord(colStartIndex, rowStartIndex, endX, MAX_INDEX_OF_ROWS);
     }
 
     /**
      * 根据图类型设置图的信息
-     * @param sheet 工作簿
+     *
+     * @param sheet      工作簿
      * @param tableChart 图的描述数据
-     * @param tableData 表格数据，只有在生成雷达图时用于计算坐标轴的单位长度
-     * @param colData 列数据
-     * @param chart 代表Excel中的一张图
+     * @param tableData  表格数据，只有在生成雷达图时用于计算坐标轴的单位长度
+     * @param colData    列数据
+     * @param chart      代表Excel中的一张图
      * @param bottomAxis 横坐标
-     * @param leftAxis 纵坐标
-     * @param xs 横坐标的数据
+     * @param leftAxis   纵坐标
+     * @param xs         横坐标的数据
      */
     private void setChartInfoByType(XSSFSheet sheet, TableChart tableChart, List<Object> tableData, Map<Field, String[]> colData, XSSFChart chart, XDDFCategoryAxis bottomAxis, XDDFValueAxis leftAxis, XDDFDataSource<String> xs) {
         switch (tableChart.getType()) {
@@ -188,7 +191,7 @@ public class ComplexExcelServiceImpl implements IComplexExcelService {
             }
             case RADAR: {
                 //计算雷达图的坐标轴单位长度
-                int majorUnit=calMajorUnit(tableChart.getChartYSeries(),tableData);
+                int majorUnit = calMajorUnit(tableChart.getChartYSeries(), tableData);
                 //雷达图需要画网格线
                 XDDFShapeProperties bottomAxisGridLinesShapeProperties = bottomAxis.getOrAddMajorGridProperties();
                 bottomAxisGridLinesShapeProperties.setLineProperties(new XDDFLineProperties(
@@ -224,10 +227,10 @@ public class ComplexExcelServiceImpl implements IComplexExcelService {
                     series1.setTitle(colYInfo[0], null);
                 }
                 chart.plot(data);
-                if (!chart.getCTChart().getPlotArea().getPieChartArray(0).getSerArray(0).isSetDLbls()){
+                if (!chart.getCTChart().getPlotArea().getPieChartArray(0).getSerArray(0).isSetDLbls()) {
                     chart.getCTChart().getPlotArea().getPieChartArray(0).getSerArray(0).addNewDLbls();
                 }
-                CTDLbls ctdLbls=chart.getCTChart().getPlotArea().getPieChartArray(0).getSerArray(0).getDLbls();
+                CTDLbls ctdLbls = chart.getCTChart().getPlotArea().getPieChartArray(0).getSerArray(0).getDLbls();
                 ctdLbls.addNewShowLegendKey().setVal(false);
                 ctdLbls.addNewShowPercent().setVal(true);
                 ctdLbls.addNewShowVal().setVal(false);
@@ -239,32 +242,32 @@ public class ComplexExcelServiceImpl implements IComplexExcelService {
     }
 
     private int calMajorUnit(List<Field> chartYSeries, List<Object> tableData) {
-        int min=0;
-        int max=0;
-        for (Field field:chartYSeries){
-            for (Object item:tableData) {
+        int min = 0;
+        int max = 0;
+        for (Field field : chartYSeries) {
+            for (Object item : tableData) {
                 field.setAccessible(true);
                 try {
-                    Object value=field.get(item);
-                    Integer valueInt=null;
-                    if (value instanceof String){
-                        valueInt=Integer.valueOf((String)value);
-                    }else if (value instanceof Double){
-                        valueInt=((Double)value).intValue();
-                    }else if (value instanceof Integer){
-                        valueInt=(Integer)value;
-                    }else if (value instanceof Long){
-                        valueInt=((Long)value).intValue();
-                    }else if (Objects.isNull(value)){
-                        valueInt=0;
-                    }else {
+                    Object value = field.get(item);
+                    Integer valueInt = null;
+                    if (value instanceof String) {
+                        valueInt = Integer.valueOf((String) value);
+                    } else if (value instanceof Double) {
+                        valueInt = ((Double) value).intValue();
+                    } else if (value instanceof Integer) {
+                        valueInt = (Integer) value;
+                    } else if (value instanceof Long) {
+                        valueInt = ((Long) value).intValue();
+                    } else if (Objects.isNull(value)) {
+                        valueInt = 0;
+                    } else {
                         throw new IllegalArgumentException("不能使用String,Double,Date,Boolean,Integer以外的类型");
                     }
-                    if (valueInt<min){
-                        min=valueInt;
+                    if (valueInt < min) {
+                        min = valueInt;
                     }
-                    if (valueInt>max){
-                        max=valueInt;
+                    if (valueInt > max) {
+                        max = valueInt;
                     }
                 } catch (IllegalAccessException e) {
                     e.printStackTrace();
@@ -272,7 +275,7 @@ public class ComplexExcelServiceImpl implements IComplexExcelService {
             }
         }
 
-        return (max-min)/tableData.size();
+        return (max - min) / tableData.size();
     }
 
     /**
@@ -377,7 +380,7 @@ public class ComplexExcelServiceImpl implements IComplexExcelService {
      * @param field 列
      * @param obj   数据对象
      * @return 如果是字符串，返回字符串的字节长度
-     *         否则返回0
+     * 否则返回0
      */
     private int setCellValueByObj(Cell cell, Field field, Object obj) {
         try {
